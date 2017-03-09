@@ -57,6 +57,13 @@ class FunctionStructure extends SyncFunction {
 		else
 			echo '"name":' . json_encode( basename($path) ) . ',';
 		if ($this->beautify) echo "\n";
+		
+		foreach ( $config['extensions'] as $key => $value ) {
+			if ($value instanceof SyncExtension) {
+				$value->doFileInfo($this->config,$path);
+			}
+		}
+		
 	}
 	
 	function printChildren($path,$depth) {

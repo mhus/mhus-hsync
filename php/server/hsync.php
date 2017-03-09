@@ -1,9 +1,9 @@
 <?php
 
-include 'functions/api.php';
-include 'functions/metadata.php';
-include 'functions/structure.php';
-include 'functions/file.php';
+require_once 'functions/api.php';
+require_once 'functions/metadata.php';
+require_once 'functions/structure.php';
+require_once 'functions/file.php';
 
 // default headers
 header('Access-Control-Allow-Origin: *');
@@ -26,7 +26,7 @@ include 'conf/defaults.php';
 $repo = $_REQUEST['repository'];
 $config['name'] = $repo;
 
-include 'conf/repo_' . sanitize_file_name($repo) . ".php";
+require_once 'conf/repo_' . sanitize_file_name($repo) . ".php";
 
 // check if repo exists and is enabled
 if (!$config['enabled']) {
@@ -49,6 +49,13 @@ if ($config['private']) {
 		header($_SERVER["SERVER_PROTOCOL"].' 401 Unauthorized');
 		echo "Unauthorized";
 		exit;
+	}
+}
+
+// init extensions
+foreach ( $config['extensions'] as $key => $value ) {
+	if ($value instanceof SyncExtension) {
+		$value->doInit($config);
 	}
 }
 
