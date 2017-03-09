@@ -1,0 +1,46 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>hsync-main</artifactId>
+  <groupId>de.mhus.hsync</groupId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  
+  <properties>
+  	<java.version>1.8</java.version>
+	<jar.plugin.version>2.6</jar.plugin.version>
+        <bundle.plugin.version>2.5.3</bundle.plugin.version>
+  </properties>
+  
+  <modules>
+  	<module>hsync-lib</module>
+  	<module>hsync-client</module>
+  </modules>
+  
+  <build>
+  	<plugins>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-compiler-plugin</artifactId>
+		    <configuration>
+	    	    <source>${java.version}</source>
+	        	<target>${java.version}</target>
+				<debug>true</debug>
+      			<debuglevel>lines,vars,source</debuglevel>
+      	    </configuration>
+		</plugin>
+		<plugin>
+	       <groupId>org.apache.maven.plugins</groupId>
+	       <artifactId>maven-jar-plugin</artifactId>
+	       <version>${jar.plugin.version}</version>
+	       <executions>
+	         <execution>
+	           <goals>
+	             <goal>test-jar</goal>
+	           </goals>
+	         </execution>
+	       </executions>
+	     </plugin>
+  	</plugins>
+  </build> 
+ 
+</project>

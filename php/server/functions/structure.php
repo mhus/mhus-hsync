@@ -5,6 +5,7 @@ class FunctionStructure extends SyncFunction {
 	private $beautify = false;
 	private $modified = 0;
 	private $root;
+	private $config;
 	
 	function doExecute($config) {
 		
@@ -15,6 +16,7 @@ class FunctionStructure extends SyncFunction {
 					
 		$this->hidden = $config['hidden'];
 		$this->root = $config['path'] . '/';
+		$this->config = $config;
 		$path = '';
 		if (isset($_REQUEST['path']))
 			$path = sanitize_path_name($_REQUEST['path']);
@@ -58,7 +60,7 @@ class FunctionStructure extends SyncFunction {
 			echo '"name":' . json_encode( basename($path) ) . ',';
 		if ($this->beautify) echo "\n";
 		
-		foreach ( $config['extensions'] as $key => $value ) {
+		foreach ( $this->config['extensions'] as $key => $value ) {
 			if ($value instanceof SyncExtension) {
 				$value->doFileInfo($this->config,$path);
 			}
