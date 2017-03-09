@@ -105,6 +105,48 @@ public class SyncConnection {
 		}
 		
 	}
+
+	public InputStream getFiles(String ... path ) {
+		try {
+			
+			status = 0;
+			statusMsg = null;
+			body = null;
+
+			HashMap<String, Object> parameters = new HashMap<>();
+			parameters.put("repository", repository);
+			parameters.put("function", "files");
+			for (int i = 0; i < path.length; i++)
+				parameters.put("path" + i, path[i]);
+			
+			HttpResponse<InputStream> res = Unirest
+					.post(hostUrl)
+					.fields(parameters)
+					.basicAuth(username, password)
+					.asBinary();
+
+			status = res.getStatus();
+			statusMsg = res.getStatusText();
+			if (res.getStatus() != 200) {
+				InputStream is = res.getRawBody();
+				StringBuffer o = new StringBuffer();
+				while (true) {
+					int i = is.read();
+					if (i < 0) break;
+					o.append((char)i);
+				}
+				body = o.toString();
+				return null;
+			}
+
+			return res.getBody();
+					
+		} catch (Throwable t) {
+			t.printStackTrace();
+			return null;
+		}
+		
+	}
 	
 	public HttpResponse<JsonNode> doPost(Map<String,Object> parameters) throws Exception{
 		

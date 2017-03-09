@@ -32,6 +32,21 @@ public class Test {
 
 		System.out.println(con.getMessage());
 
+		
+		
+		InputStream files = con.getFiles("animal/links.txt");
+		if (files != null) {
+			StringBuffer o = new StringBuffer();
+			while (true) {
+				int i = files.read();
+				if (i < 0) break;
+				o.append((char)i);
+			}
+			System.out.println(o);
+		}
+
+		System.out.println(con.getMessage());
+		
 	}
 
 }
