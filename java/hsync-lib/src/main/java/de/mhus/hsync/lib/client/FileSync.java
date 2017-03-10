@@ -13,10 +13,10 @@ public class FileSync {
 	protected File root = null;
 	protected boolean delete = false;
 	protected boolean versions = false;
-	protected boolean overwrite = true;
+	protected boolean overwrite = false;
 	private boolean test = true;
 	private boolean hidden = false;
-	private boolean checkSize = false;
+	private boolean checkSize = true;
 	private boolean checkModified = true;
 	private int version;
 	
@@ -75,8 +75,22 @@ public class FileSync {
 				if (	overwrite || 
 						!localChild.exists() || 
 						(checkSize && localChild.length() != remoteChild.getSize() ) || 
-						(checkModified && localChild.lastModified() != remoteChild.getModifyDate() ) 
+						(checkModified && localChild.lastModified()/1000 != remoteChild.getModifyDate()/1000 ) 
 					) {
+					
+					if (overwrite)
+						log.finer("update by overwrite");
+					else
+					if (!localChild.exists())
+						log.finer("update because local is not present");
+					else
+					if (checkSize && localChild.length() != remoteChild.getSize() )
+						log.finer("ubdate by file size: L=" + localChild.length() + " R=" + remoteChild.getSize());
+					else
+					if (checkModified && localChild.lastModified()/1000 != remoteChild.getModifyDate()/1000 )
+						log.finer("update by modified: L=" + localChild.lastModified() + " R=" + remoteChild.getModifyDate());
+					else
+						log.fine("update ... don't know wmy");
 					
 					if (localChild.exists() && !localChild.isFile()) {
 						log.fine("*** Can't update file, it's not a file: " + localChild);
