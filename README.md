@@ -9,13 +9,59 @@ Version 1: The HTTP side is only read only
 
 Version 2: Also implement at HTTP side write functionality
 
-## Installation
+## PHP Sync-Server Installation
 
-## Configuration
+Copy the 'php/server/' parts into a PHP enabled document root and configure the repositories by creating files 'conf/'. Remove or disable the 'test' repsoitory (repo_test.php). Set a .htaccess and .htpasswd files to enable authentication.
 
-## Client
+If you have the preositories inside the document root set also strong access rules to this repository. If you want to use repositories outside the document root you need to change the php rules. The same for temp directories.
 
+## PHP Sync-Server Configuration
 
+For every repository create a repo_name of the repo.php file in the conf folder. Copy the repo_test.php file. Open the file and modify the configuration parameters.
+
+* enabled=true|false: Activate / Deactovate this repository
+* description=text: Description of the repository
+* public=true|false: Set to true if you do not need authorization (if you use a basic auth access control every user can access the repository)
+* path=path: The path to the root of the repository to share
+* users=Array of allowed users: If the repository is not public, a list of allowed user names
+
+## Java Client
+
+Use the java client jar file to sync a repository
+
+java -jar hsync.jar -url http://localhost/hsync/hsync.php -r test -d pull ~/tmp/test
+
+You need to set:
+* -url url: The url to the server side script
+* -u user: Username to login (if needed)
+* -p password: Password to login
+* -r repository: Name of the repository
+* command: pull|info
+* Local document root
+
+You can set:
+* -d: delete local files if not needed
+* -v: verbose output
+* -vv: more verbose output
+
+Example:
+```
+mikehummel:~ # java -jar /Users/mikehummel/MHU/workspaces/mhus-hsync/mhus-hsync/java/hsync-client/target/hsync-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar -url http://localhost/hsync/hsync.php -r test -d pull ~/tmp/test
++ d /animal
++ d /animal/amphibians
++ d /animal/birds
++ d /animal/fish
++ d /animal/invertebrates
++ d /animal/invertebrates/arthropods
++ f /animal/invertebrates/arthropods/insects.txt
++ f /animal/invertebrates/snail.txt
++ f /animal/links.txt
++ d /animal/mammals
++ d /animal/reptiles
++ d /vehicle
++ d /vehicle/auto
++ d /vehicle/plain
+```
 
 ## Protocol transport layer
 
@@ -54,7 +100,7 @@ Out:
 * extensions (extensions:String): Comma separated list of installed extensions, the list is case insensitive 
 
 Example:
-
+```
 http://hsync?function=metadata&repository=test
 
 {
@@ -63,7 +109,7 @@ http://hsync?function=metadata&repository=test
   'repository': 'test',
   'extensions': 'ZIP'
 }
-
+```
 ### (2) Request structure
 
 * Function: structure
@@ -82,7 +128,7 @@ Out: A list of files in a deep array structure, every node is an object:
 * children (nodes:Array) (only for directories)
 
 Example:
-
+```
 http://hsync?function=structure&repository=test&path=/
 
 {
@@ -104,7 +150,7 @@ http://hsync?function=structure&repository=test&path=/
     }
   ]
 }
-
+```
 ### (3) Download file
 
 * Function: file
@@ -117,11 +163,11 @@ Out:
 * The file as content
 
 Example:
-
+```
 http://hsync?function=file&path=/sample.pdf
 
 (Content stream)
-
+```
 ### (4) Download files (extension ZIP)
 
 * Function: files
