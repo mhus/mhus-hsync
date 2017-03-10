@@ -24,7 +24,7 @@ Test the installation (modify url and repository name):
 
 ## PHP Sync-Server Configuration
 
-For every repository create a repo_name of the repo.php file in the conf folder. Copy the repo_test.php file. Open the file and modify the configuration parameters.
+For every repository create a repo_name of the repo.php file in the conf folder. Copy the repo_sample.php file. Open the file and modify the configuration parameters.
 
 Parameters:
 
