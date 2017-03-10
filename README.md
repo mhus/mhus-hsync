@@ -11,7 +11,10 @@ Version 2: Also implement at HTTP side write functionality
 
 ## PHP Sync-Server Installation
 
-Copy the 'php/server/' parts into a PHP enabled document root and configure the repositories by creating files 'conf/'. Remove or disable the 'test' repsoitory (repo_test.php). Set a .htaccess and .htpasswd files to enable authentication.
+* Copy the 'php/server/' parts into a PHP enabled document root and configure the repositories by creating files 'conf/'. 
+* Remove the 'test' repsoitory (repo_test.php). 
+* Remove test folder 'repo'. 
+* Set a .htaccess and .htpasswd files to enable authentication.
 
 If you have the preositories inside the document root set also strong access rules to this repository. If you want to use repositories outside the document root you need to change the php rules. The same for temp directories.
 
@@ -46,7 +49,7 @@ You can set:
 
 Example:
 ```
-mikehummel:~ # java -jar /Users/mikehummel/MHU/workspaces/mhus-hsync/mhus-hsync/java/hsync-client/target/hsync-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar -url http://localhost/hsync/hsync.php -r test -d pull ~/tmp/test
+mikehummel:~ # java -jar mhus-hsync/java/hsync-client/target/hsync-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar -url http://localhost/hsync/hsync.php -r test -d pull ~/tmp/test
 + d /animal
 + d /animal/amphibians
 + d /animal/birds
