@@ -1,9 +1,11 @@
 # mhus-hsync
 Sync tools like rsync in different languages but compatible over http.
 
-A big problem of rsync is that it is not possible to synchrionize files over the very common protocol 'http' or 'https'. To solve the requirement I created this project. The goals should be synchronizing files over http in different languages. Therefore a simple protocol will do the job.
+A big problem of rsync is that it is not possible to synchrionize files over the very common protocol 'http' or 'https'. To solve the requirement I created this project. The goals should be synchronizing files over http using different programming languages. Therefore a simple protocol will do the job.
 
 The tool consists of a server (HTTP) side and a client side. For both there will be different implementations in different languages but with the same protocol. In this way the software is compatible and able to work cross over.
+
+Prefered server side language is PHP and Java (Servlet implementation). The first cliend side is Java but the job should also be done with Python. Maybe a C# implementation is should be done.
 
 ## Versions
 
