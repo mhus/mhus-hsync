@@ -18,9 +18,15 @@ Version 2: Also implement at HTTP side write functionality
 
 If you have the preositories inside the document root set also strong access rules to this repository. If you want to use repositories outside the document root you need to change the php rules. The same for temp directories.
 
+Test the installation (modify url and repository name):
+* http://localhost/hsync/hsync.php?repository=test&function=metadata
+* http://localhost/hsync/hsync.php?repository=test&function=structure
+
 ## PHP Sync-Server Configuration
 
 For every repository create a repo_name of the repo.php file in the conf folder. Copy the repo_test.php file. Open the file and modify the configuration parameters.
+
+Parameters:
 
 * enabled=true|false: Activate / Deactovate this repository
 * description=text: Description of the repository
@@ -33,6 +39,12 @@ For every repository create a repo_name of the repo.php file in the conf folder.
 Use the java client jar file to sync a repository
 
 java -jar hsync.jar -url http://localhost/hsync/hsync.php -r test -d pull ~/tmp/test
+
+If you need to compile the client before:
+* clone sources: git clone https://github.com/mhus/mhus-hsync.git
+* change directory into java server: cd mhus-hsync/java/server
+* compile using maven: mvn install
+* Use the compiled assembly: mhus-hsync/java/hsync-client/target/hsync-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar
 
 You need to set:
 * -url url: The url to the server side script
