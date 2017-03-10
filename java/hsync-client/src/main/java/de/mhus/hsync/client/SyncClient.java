@@ -2,8 +2,13 @@ package de.mhus.hsync.client;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.logging.Formatter;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import de.mhus.hsync.lib.client.FileSync;
 import de.mhus.hsync.lib.client.SyncConnection;
@@ -22,7 +27,9 @@ public class SyncClient {
 		Logger rootLog = Logger.getLogger("");
 		rootLog.setLevel( Level.INFO );
 		rootLog.getHandlers()[0].setLevel( Level.INFO ); // Default console handler
-
+		CustomRecordFormatter formatter = new CustomRecordFormatter();
+		rootLog.getHandlers()[0].setFormatter(formatter);
+		
 		for (int i=0; i < args.length; i++) {
 			String arg = args[i];
 			if ("-vv".equals(arg)) {
@@ -81,4 +88,31 @@ public class SyncClient {
 		
 	}
 
+	static class CustomRecordFormatter extends Formatter {
+	    @Override
+	    public String format(final LogRecord r) {
+	        StringBuilder sb = new StringBuilder();
+	        sb.append(formatMessage(r)).append(System.getProperty("line.separator"));
+	        if (null != r.getThrown()) {
+	            sb.append("Throwable occurred: "); //$NON-NLS-1$
+	            Throwable t = r.getThrown();
+	            PrintWriter pw = null;
+	            try {
+	                StringWriter sw = new StringWriter();
+	                pw = new PrintWriter(sw);
+	                t.printStackTrace(pw);
+	                sb.append(sw.toString());
+	            } finally {
+	                if (pw != null) {
+	                    try {
+	                        pw.close();
+	                    } catch (Exception e) {
+	                        // ignore
+	                    }
+	                }
+	            }
+	        }
+	        return sb.toString();
+	    }
+	}
 }

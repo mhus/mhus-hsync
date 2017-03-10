@@ -44,7 +44,7 @@ public class FileSync {
 		}
 		
 		if (!local.exists()) {
-			log.info("+ Create local directory: " + local);
+			log.info("+ d " + remote);
 			local.mkdirs();
 		}
 		
@@ -81,7 +81,7 @@ public class FileSync {
 					if (localChild.exists() && !localChild.isFile()) {
 						log.fine("*** Can't update file, it's not a file: " + localChild);
 					} else {
-						log.info("+ " + remoteChild);
+						log.info("+ f " + remoteChild);
 						FileOutputStream os = new FileOutputStream(localChild);
 						if (!con.getFile(remoteChild.getPath(), os)) {
 							log.fine("*** Update failed: " + remoteChild);
@@ -102,7 +102,7 @@ public class FileSync {
 			for (String item : localList) {
 				File localChild = new File(local,item);
 				if (localChild.exists()) {
-					log.info("- " + remote + "/" + item);
+					log.info("- " + (localChild.isDirectory() ? "d" : "f") + " " + remote + "/" + item);
 					delete(localChild);
 				}
 			}
