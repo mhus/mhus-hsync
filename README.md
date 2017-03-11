@@ -32,11 +32,19 @@ For every repository create a repo_name of the repo.php file in the conf folder.
 
 Parameters:
 
-* enabled=true|false: Activate / Deactovate this repository
+* enabled=true|**false**: Activate / Deactovate this repository
 * description=text: Description of the repository
-* public=true|false: Set to true if you do not need authorization (if you use a basic auth access control every user can access the repository)
+* public=true|**false**: Set to true if you do not need authorization (if you use a basic auth access control every user can access the repository)
 * path=path: The path to the root of the repository to share
 * users=Array of allowed users: If the repository is not public, a list of allowed user names
+* showHidden=true|**false**: Enable show and follow hidden entries (starting with .)
+* showLinks=**true**|false: Enable show and follow links
+* followLinks=true|**false**: Enable following links
+
+Notes:
+
+* IMPORTANT: In the server it could be possible to access all files in the repository, inclusive hidden and linked entries even if the will not be shown in the structure output.
+
 
 ## Java Client
 
@@ -145,6 +153,7 @@ Out: A list of files in a deep array structure, every node is an object:
 * modifyDate (modified:long) (optional for directories)
 * size (size:long) (in bytes, files only)
 * children (nodes:Array) (only for directories)
+* link target (link:String) (only for links)
 
 Example:
 ```
