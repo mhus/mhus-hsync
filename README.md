@@ -111,7 +111,7 @@ Out error:
 
 ## Protocol Version 1
 
-The server need tree main functions and one default extension (ZIP).
+The server needs three main functions and one default extension (ZIP).
 
 ### (1) A metadata request to get the current server information and also check the accessibility
 
@@ -196,7 +196,7 @@ http://hsync?function=file&path=/sample.pdf
 
 (Content stream)
 ```
-### (4) Download files (extension ZIP)
+### (4) Download files (extension ZIP, optional)
 
 * Function: files
 * The etension is optional and depends on the implementation of the server side
@@ -208,5 +208,87 @@ In:
 Out:
 * The files packed in a zip file as content
 
+## Protocol Version 2
 
+Aditional functionallity to allow write back operations.
 
+* delete: Delete a file, directory or link
+* mkdir: Create a directory
+* upload: Upload a file
+* link: create a link
+* zipupload: Upload a package of files (ZIP extension, optional)
+
+### (5) Delete node
+
+Delete a file, directory (recursive) or link.
+
+Function: delete
+
+In:
+* repository
+* path
+
+Out:
+* result (success:boolean)
+
+Example
+```
+http://hsync?function=file&path=/sample.pdf
+
+{
+  'success':true
+}
+```
+
+### (6) Create remote directory
+
+Function: mkdir
+
+Create the full path of directories.
+
+In:
+* repository
+* path
+
+Out:
+* Result (success:boolean)
+
+### (7) Create or upload remote file
+
+Function: upload
+
+In:
+* repository
+* path
+* (file content upload)
+
+Out:
+* result (sucess:boolean)
+
+### (8) Create or update a link
+
+Function: link
+
+Create a new link. If the path already exists, it will be deleted. No matter file, directory or link.
+
+In:
+* repository
+* path
+* target
+
+Out:
+* Result (success:boolean)
+
+### (9) Upload files using a zip archive for transfer
+
+Function: zipupload
+
+Upload a zip file and iport the content relative to the given path.
+
+In:
+* repository
+* path
+* (zip content file)
+
+Out:
+* Result (sucess:boolean)
