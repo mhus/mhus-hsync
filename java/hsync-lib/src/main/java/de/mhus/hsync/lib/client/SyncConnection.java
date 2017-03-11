@@ -320,11 +320,13 @@ public class SyncConnection {
 
 		@Override
 		public boolean isFile() {
+			if (!data.has("type")) return false;
 			return "f".equals(data.getString("type"));
 		}
 
 		@Override
 		public boolean isDirectory() {
+			if (!data.has("type")) return false;
 			return "d".equals(data.getString("type"));
 		}
 
@@ -335,16 +337,19 @@ public class SyncConnection {
 
 		@Override
 		public long getModifyDate() {
+			if (!data.has("modified")) return 0;
 			return data.getLong("modified");
 		}
 
 		@Override
 		public List<SyncStructure> getChildren() {
 			LinkedList<SyncStructure> out = new LinkedList<>();
-			JSONArray children = data.getJSONArray("nodes");
-			for (int i = 0; i < children.length(); i++) { 
-				JSONObject item = children.getJSONObject(i);
-				out.add(new IntStructure(item, path));
+			if (data.has("nodes")) {
+				JSONArray children = data.getJSONArray("nodes");
+				for (int i = 0; i < children.length(); i++) { 
+					JSONObject item = children.getJSONObject(i);
+					out.add(new IntStructure(item, path));
+				}
 			}
 			return out;
 		}
@@ -364,7 +369,24 @@ public class SyncConnection {
 
 		@Override
 		public long getSize() {
+			if (!data.has("size")) return 0;
 			return data.getLong("size");
+		}
+
+		@Override
+		public boolean isLink() {
+			return data.has("target");
+		}
+
+		@Override
+		public String getLinkTaget() {
+			if (!data.has("target")) return null;
+			return data.getString("target");
+		}
+
+		@Override
+		public boolean hasChildren() {
+			return data.has("nodes");
 		}
 
 	}

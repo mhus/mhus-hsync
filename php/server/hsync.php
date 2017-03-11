@@ -77,11 +77,27 @@ if ($_SERVER['REQUEST_METHOD'] == "GET" || $_SERVER['REQUEST_METHOD'] == "POST" 
 exit;
 
 function sanitize_file_name( $filename ) {
-	return $filename;
+//	return preg_replace("/[^a-zA-Z0-9\.]/", "", strtolower($filename));
+	$dangerous_characters = array(" ", '"', "'", "&", "/", "\\", "?", "#", "*");
+	return str_replace($dangerous_characters, '_', $filename);
 }
 
 function sanitize_path_name( $filename ) {
-	return $filename;
+	//	return preg_replace("/[^a-zA-Z0-9\.\/]/", "", strtolower($filename));
+	$dangerous_characters = array(" ", '"', "'", "&", "?", "#", "*");
+	return str_replace($dangerous_characters, '_', $filename);
+}
+
+function validate_link_target($target) {
+	if (
+			strlen($target) < 1 ||
+			$target[0] == '.' ||
+			$target[0] == '~' ||
+			$target[0] == '/' ||
+			strpos($target, '..') > -1 ||
+			strpos($target, ':') > -1
+			) return false;
+			return true;
 }
 
 ?>

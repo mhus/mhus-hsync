@@ -59,9 +59,6 @@ public class SyncClient {
 			if ("-d".equals(arg) || "-delete".equals(arg)) {
 				sync.setDelete(true);
 			} else
-			if ("-versions".equals(arg)) {
-				sync.setVersions(true);
-			} else
 			if ("-size".equals(arg)) {
 				sync.setCheckSize(true);
 			} else

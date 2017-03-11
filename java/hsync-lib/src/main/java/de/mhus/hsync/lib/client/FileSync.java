@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
@@ -12,13 +14,19 @@ public class FileSync {
 	private static Logger log = Logger.getLogger(FileSync.class.getCanonicalName());
 	protected File root = null;
 	protected boolean delete = false;
-	protected boolean versions = false;
 	protected boolean overwrite = false;
 	private boolean test = true;
 	private boolean hidden = false;
+	private boolean createLinks = true;
 	private boolean checkSize = true;
 	private boolean checkModified = true;
 	private int version;
+	private long bytesPulled = 0;
+	private long bytesPushed = 0;
+	private long bytesDeleted = 0;
+	private long filesPulled = 0;
+	private long filesPushed = 0;
+	private long filesDeleted = 0;
 	
 	public void doSync(SyncConnection con) throws IOException {
 		if (root == null || !root.exists()) throw new IOException("root not found: " + root);
@@ -33,6 +41,8 @@ public class FileSync {
 		
 		syncDirectory(con, remoteRoot, root);
 		
+		log.info("Pulled : " + filesPulled + ", " + bytesPulled + " Bytes");
+		log.info("Deleted: " + filesDeleted + ", " + bytesDeleted + " Bytes");
 		log.fine("<<< End");
 		
 	}
@@ -43,8 +53,34 @@ public class FileSync {
 			return;
 		}
 		
+		if (createLinks && remote.isLink()) {
+			if (local.exists()) {
+				if (Files.isSymbolicLink(local.toPath())) {
+					Path localTarget = Files.readSymbolicLink(local.toPath());
+					if (!localTarget.toString().equals(remote.getLinkTaget())) {
+						log.info("- l 0 " + remote.getPath());
+						local.delete();
+					} else
+						return; // do not look insinde the linked directory
+				} else
+				if (delete) {
+					log.info("- " + (local.isDirectory() ? "d 0 " : "f " + local.length() + " ") + remote.getPath());
+					delete(local);
+				} else {
+					log.info("*** Cant change link: " + local);
+					return;
+				}
+			}
+			if (!local.exists()) {
+				log.info("+ l 0 " + remote.getPath() + " -> " + remote.getLinkTaget());
+				Files.createSymbolicLink(local.toPath(), new File( remote.getLinkTaget() ).toPath() );
+				return;
+			}
+		}
+		
+		
 		if (!local.exists()) {
-			log.info("+ d " + remote);
+			log.info("+ d 0 " + remote);
 			local.mkdirs();
 		}
 		
@@ -95,7 +131,9 @@ public class FileSync {
 					if (localChild.exists() && !localChild.isFile()) {
 						log.fine("*** Can't update file, it's not a file: " + localChild);
 					} else {
-						log.info("+ f " + remoteChild);
+						log.info("+ f " + remoteChild.getSize() + " " + remoteChild.getPath());
+						bytesPulled+=remoteChild.getSize();
+						filesPulled++;
 						FileOutputStream os = new FileOutputStream(localChild);
 						if (!con.getFile(remoteChild.getPath(), os)) {
 							log.fine("*** Update failed: " + remoteChild);
@@ -116,7 +154,7 @@ public class FileSync {
 			for (String item : localList) {
 				File localChild = new File(local,item);
 				if (localChild.exists()) {
-					log.info("- " + (localChild.isDirectory() ? "d" : "f") + " " + remote + "/" + item);
+					log.info("- " + (localChild.isDirectory() ? "d 0 " : "f " + localChild.length() + " ") + remote + "/" + item);
 					delete(localChild);
 				}
 			}
@@ -124,7 +162,7 @@ public class FileSync {
 		
 	}
 
-	public static void delete(File local) {
+	public void delete(File local) {
 		if (!local.exists()) return;
 		if (local.isDirectory()) {
 			for (File item : local.listFiles()) {
@@ -132,6 +170,10 @@ public class FileSync {
 					continue;
 				delete(item);
 			}
+		}
+		if (local.isFile()) {
+			bytesDeleted+=local.length();
+			filesDeleted++;
 		}
 		local.delete();
 	}
@@ -154,17 +196,6 @@ public class FileSync {
 	public void setDelete(boolean delete) {
 		this.delete = delete;
 	}
-
-
-	public boolean isVersions() {
-		return versions;
-	}
-
-
-	public void setVersions(boolean versions) {
-		this.versions = versions;
-	}
-
 
 	public boolean isOverwriteAll() {
 		return overwrite;
@@ -197,6 +228,14 @@ public class FileSync {
 
 	public void setCheckModified(boolean checkModified) {
 		this.checkModified = checkModified;
+	}
+
+	public boolean isCreateLinks() {
+		return createLinks;
+	}
+
+	public void setCreateLinks(boolean createLinks) {
+		this.createLinks = createLinks;
 	}
 	
 }

@@ -19,7 +19,7 @@ public class TestFileSync {
 		FileSync sync = new FileSync();
 		
 		File root = new File("target/test");
-		FileSync.delete(root);
+		delete(root);
 		root.mkdirs();
 		sync.setRoot(root);
 		
@@ -27,6 +27,18 @@ public class TestFileSync {
 
 		sync.doSync(con);
 
+	}
+
+	public static void delete(File local) {
+		if (!local.exists()) return;
+		if (local.isDirectory()) {
+			for (File item : local.listFiles()) {
+				if (item.getName().equals(".") || item.getName().equals(".."))
+					continue;
+				delete(item);
+			}
+		}
+		local.delete();
 	}
 
 }
