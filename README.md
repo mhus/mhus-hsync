@@ -192,7 +192,7 @@ Out:
 
 Example:
 ```
-http://hsync?function=file&path=/sample.pdf
+http://hsync?repository=test&function=file&path=/sample.pdf
 
 (Content stream)
 ```
@@ -233,7 +233,7 @@ Out:
 
 Example
 ```
-http://hsync?function=file&path=/sample.pdf
+http://hsync?repository=test&function=delete&path=/sample.pdf
 
 {
   'success':true
