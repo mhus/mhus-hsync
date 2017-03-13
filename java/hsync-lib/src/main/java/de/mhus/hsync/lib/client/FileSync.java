@@ -141,7 +141,7 @@ public class FileSync {
 						os.close();
 						localChild.setLastModified( remoteChild.getModifyDate() );
 						if (localChild.length() != remoteChild.getSize()) {
-							log.fine("*** Updated but different size: " + remoteChild);
+							log.fine("*** Updated but different size: " + remoteChild + " R: " + remoteChild.getSize() + " L: " + localChild.length() + " " + localChild.getAbsolutePath());
 						}
 					}
 					

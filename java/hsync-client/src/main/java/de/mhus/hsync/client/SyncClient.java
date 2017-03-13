@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map.Entry;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
@@ -16,9 +17,12 @@ import java.util.logging.SimpleFormatter;
 
 import de.mhus.hsync.lib.client.FileSync;
 import de.mhus.hsync.lib.client.SyncConnection;
+import de.mhus.hsync.lib.client.SyncMetadata;
 
 public class SyncClient {
 
+	static Logger log = Logger.getLogger(SyncClient.class.getName());
+	
 	public static void main(String[] args) throws IOException {
 		
 		String cmd = null;
@@ -88,7 +92,7 @@ public class SyncClient {
 			root = new File(".");
 		}
 		
-		File projectFile = findProject(root);
+		File projectFile = findProject(root.getAbsoluteFile());
 		if (projectFile != null) {
 			path = root.getAbsolutePath().substring(projectFile.getAbsolutePath().length());
 			File f = new File(projectFile, ".hsync.properties");
@@ -125,13 +129,28 @@ public class SyncClient {
 			FileSync sync = new FileSync();
 			fillSync(sync, props);
 			SyncConnection con = createCon(props);
+//			sync.setRoot(projectFile == null ? root : projectFile);
 			sync.setRoot(root);
 						
 			sync.doPull(con, path);
 			return;
 		}
+		if (cmd.equals("info")) {
+			SyncConnection con = createCon(props);
+			SyncMetadata meta = con.getMetadata();
+			System.out.println("Repository  : " + meta.getName());
+			System.out.println("Version     : " + meta.getVersion());
+			System.out.println("Extensions  : " + Arrays.toString(meta.getExtensions()));
+			System.out.println("Functions   : " + Arrays.toString(meta.getFunctions()));
+			System.out.println("Description : " + meta.getDescription());
+			if (projectFile != null) {
+			System.out.println("Project Root: " + projectFile);
+			System.out.println("Project Path: " + path);
+			}
+			return;
+		}
 		
-		
+		usage();
 		
 		
 	}
@@ -151,14 +170,18 @@ public class SyncClient {
 	}
 
 	private static File findProject(File root) {
+		log.fine("- search for project file in " + root);
 		if (root == null) return null;
 		File f = new File(root, ".hsync.properties");
-		if (f.exists()) return root;
-		return root.getParentFile();
+		if (f.exists()) {
+			log.fine("Found project file " + f);
+			return root;
+		}
+		return findProject(root.getParentFile());
 	}
 
 	static void usage() {
-		System.out.println("Usage: hsync -url <url> -u <user> -p <password> -r <repository> [-delete|-d -notsize -overwrite -v -vv] clone|pull [<root dir>]");
+		System.out.println("Usage: hsync -url <url> -u <user> -p <password> -r <repository> [-delete|-d -notsize -overwrite -v -vv] info|clone|pull [<root dir>]");
 	}
 
 	static class CustomRecordFormatter extends Formatter {

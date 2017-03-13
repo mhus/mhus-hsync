@@ -51,6 +51,7 @@ public class SyncConnection {
 			parameters.put("function", "metadata");
 			HttpResponse<JsonNode> res = doPost(parameters);
 			if (res == null) return null;
+			log.finer("response " + String.valueOf(res.getBody()));
 			return new IntMetadata(res.getBody());
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -69,6 +70,7 @@ public class SyncConnection {
 			
 			HttpResponse<JsonNode> res = doPost(parameters);
 			if (res == null) return null;
+			log.finer("response " + String.valueOf(res.getBody()));
 			return new IntStructure(res.getBody() );
 		} catch (Throwable t) {
 			t.printStackTrace();
