@@ -39,7 +39,7 @@ public class FileSync {
 		
 		SyncStructure remoteRoot = con.getStructure(path, null, null);
 		
-		pullDirectory(con, remoteRoot, root);
+		pullDirectory(path, con, remoteRoot, root);
 		
 		log.info("Pulled : " + filesPulled + ", " + bytesPulled + " Bytes");
 		log.info("Deleted: " + filesDeleted + ", " + bytesDeleted + " Bytes");
@@ -47,7 +47,7 @@ public class FileSync {
 		
 	}
 	
-	private void pullDirectory(SyncConnection con, SyncStructure remote, File local) throws IOException {
+	private void pullDirectory(String path, SyncConnection con, SyncStructure remote, File local) throws IOException {
 		if (!remote.isDirectory()) {
 			log.fine("*** Remote is not a directory: " + remote.getPath());
 			return;
@@ -105,7 +105,7 @@ public class FileSync {
 			localList.remove(remoteChild.getName());
 			if (remoteChild.isDirectory()) {
 				log.finer("--- Synchronize Directory: " + remoteChild);
-				pullDirectory(con, remoteChild, localChild);
+				pullDirectory(path, con, remoteChild, localChild);
 			} else {
 				log.finer("--- Synchronize File: " + remoteChild);
 				if (	overwrite || 
@@ -121,7 +121,7 @@ public class FileSync {
 						log.finer("update because local is not present");
 					else
 					if (checkSize && localChild.length() != remoteChild.getSize() )
-						log.finer("ubdate by file size: L=" + localChild.length() + " R=" + remoteChild.getSize());
+						log.finer("update by file size: L=" + localChild.length() + " R=" + remoteChild.getSize() + " " + localChild.getAbsolutePath());
 					else
 					if (checkModified && localChild.lastModified()/1000 != remoteChild.getModifyDate()/1000 )
 						log.finer("update by modified: L=" + localChild.lastModified() + " R=" + remoteChild.getModifyDate());
@@ -132,10 +132,11 @@ public class FileSync {
 						log.fine("*** Can't update file, it's not a file: " + localChild);
 					} else {
 						log.info("+ f " + remoteChild.getSize() + " " + remoteChild.getPath());
+						log.fine("Save to " + localChild.getAbsolutePath());
 						bytesPulled+=remoteChild.getSize();
 						filesPulled++;
 						FileOutputStream os = new FileOutputStream(localChild);
-						if (!con.getFile(remoteChild.getPath(), os)) {
+						if (!con.getFile( (path == null ? "" : path) + remoteChild.getPath(), os)) {
 							log.fine("*** Update failed: " + remoteChild);
 						}
 						os.close();

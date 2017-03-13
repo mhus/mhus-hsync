@@ -1,5 +1,6 @@
 package de.mhus.hsync.lib.client;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -111,13 +112,24 @@ public class SyncConnection {
 			}
 
 			InputStream is = res.getBody();
-			// TODO Optimize
-			while (true) {
-				int i = is.read();
-				if (i < 0) break;
-				os.write(i);
-			}
+			byte[] buf = new byte[1024 * 100];
+			long abscnt = 0;
+			try {
+				while (true) {
+					int cnt = is.read(buf);
+					if (cnt == 0) 
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException ie) {}
+					else {
+						os.write(buf,0,cnt);
+						abscnt+=cnt;
+					}
+				}
+			} catch (EOFException eofe) {}
 			is.close();
+			
+			log.fine("Read " + abscnt);
 			
 			return true;
 					
