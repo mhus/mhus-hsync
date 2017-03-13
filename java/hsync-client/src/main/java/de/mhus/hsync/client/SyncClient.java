@@ -85,11 +85,14 @@ public class SyncClient {
 					usage();
 					return;
 				}
+				freeCnt++;
 			}
 		}
 		
 		if (root == null) {
-			root = new File(".");
+			root = new File(".").getCanonicalFile();
+		} else {
+			root = root.getCanonicalFile();
 		}
 		
 		File projectFile = findProject(root.getAbsoluteFile());
