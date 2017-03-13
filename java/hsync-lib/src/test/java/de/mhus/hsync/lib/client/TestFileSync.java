@@ -23,9 +23,9 @@ public class TestFileSync {
 		root.mkdirs();
 		sync.setRoot(root);
 		
-		sync.doSync(con);
+		sync.doPull(con, null);
 
-		sync.doSync(con);
+		sync.doPull(con, null);
 
 	}
 

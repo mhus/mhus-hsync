@@ -1,9 +1,13 @@
 package de.mhus.hsync.client;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -17,18 +21,18 @@ public class SyncClient {
 
 	public static void main(String[] args) throws IOException {
 		
-		FileSync sync = new FileSync();
-		String username = null;
-		String password = null;
-		String repository = null;
-		String url = null;
-		boolean pull = true;
-
+		String cmd = null;
+		File root = null;
+		String path = null;
+		
 		Logger rootLog = Logger.getLogger("");
 		rootLog.setLevel( Level.INFO );
 		rootLog.getHandlers()[0].setLevel( Level.INFO ); // Default console handler
 		CustomRecordFormatter formatter = new CustomRecordFormatter();
 		rootLog.getHandlers()[0].setFormatter(formatter);
+		
+		Properties props = new Properties();
+		int freeCnt = 0;
 		
 		for (int i=0; i < args.length; i++) {
 			String arg = args[i];
@@ -42,47 +46,119 @@ public class SyncClient {
 			} else
 			if ("-u".equals(arg)) {
 				i++;
-				username = args[i];
+				props.setProperty("username", args[i]);
 			} else
 			if ("-p".equals(arg)) {
 				i++;
-				password = args[i];
+				props.setProperty("password", args[i]);
 			} else
 			if ("-url".equals(arg)) {
 				i++;
-				url = args[i];
+				props.setProperty("url", args[i]);
 			} else
 			if ("-r".equals(arg)) {
 				i++;
-				repository = args[i];
+				props.setProperty("repository", args[i]);
 			} else
 			if ("-d".equals(arg) || "-delete".equals(arg)) {
-				sync.setDelete(true);
+				props.setProperty("delete", "true");
 			} else
-			if ("-size".equals(arg)) {
-				sync.setCheckSize(true);
+			if ("-notsize".equals(arg)) {
+				props.setProperty("checksize", "false");
+			} else
+			if ("-notmodified".equals(arg)) {
+				props.setProperty("checkmodified", "false");
 			} else
 			if ("-overwrite".equals(arg)) {
-				sync.setOverwriteAll(true);
-			} else
-			if ("pull".equals(arg)) {
-				pull = true;
-			} else
-			if (!arg.startsWith("-")) {
-				sync.setRoot(new File(arg));
+				props.setProperty("overwrite", "true");
+			} else {
+				if (freeCnt == 0) {
+					cmd = arg;
+				} else
+				if (freeCnt == 1) {
+					root = new File(arg);
+				} else {
+					usage();
+					return;
+				}
 			}
 		}
 		
-		if (!pull || sync.getRoot() == null) {
-			System.out.println("Usage: hsync -url <url> -u <user> -p <password> -r <repository> [-delete|-d -size -overwrite -v -vv] pull <root dir>");
+		if (root == null) {
+			root = new File(".");
+		}
+		
+		File projectFile = findProject(root);
+		if (projectFile != null) {
+			path = root.getAbsolutePath().substring(projectFile.getAbsolutePath().length());
+			File f = new File(projectFile, ".hsync.properties");
+			Properties p = new Properties();
+			FileInputStream fis = new FileInputStream(f);
+			p.load(fis);
+			fis.close();
+			for (Entry<Object, Object> entry : p.entrySet()) {
+				if (!props.containsKey(entry.getKey()))
+					props.put(entry.getKey(), entry.getValue());
+			}
+		}
+		
+		if (cmd.equals("clone")) {
+			if (projectFile != null) {
+				System.out.println("Can't clone into other projects folder " + projectFile.getAbsolutePath());
+				return;
+			}
+			root = new File(root, props.getProperty("repository"));
+			if (root.exists()) {
+				System.out.println("Root folder for repository already exists " + root.getAbsolutePath());
+				return;
+			}
+			root.mkdir();
+			
+			File f = new File(root, ".hsync.properties");
+			FileOutputStream fos = new FileOutputStream(f);
+			props.save(fos, "");
+			fos.close();
+			
+			cmd = "pull";
+		}
+		if (cmd.equals("pull")) {
+			FileSync sync = new FileSync();
+			fillSync(sync, props);
+			SyncConnection con = createCon(props);
+			sync.setRoot(root);
+						
+			sync.doPull(con, path);
 			return;
 		}
 		
 		
 		
-		SyncConnection con = new SyncConnection(url, username, password, repository);
-		sync.doSync(con);
 		
+	}
+	
+	private static SyncConnection createCon(Properties props) {
+		SyncConnection con = new SyncConnection(props.getProperty("url"), props.getProperty("username"), props.getProperty("password"), props.getProperty("repository"));
+		return con;
+	}
+
+	private static void fillSync(FileSync sync, Properties props) {
+		sync.setDelete(Boolean.valueOf(props.getProperty("delete", "false")));
+		sync.setCheckModified(Boolean.valueOf(props.getProperty("checkmodified", "true")));
+		sync.setCheckSize(Boolean.valueOf(props.getProperty("checksize", "true")));
+		sync.setCreateLinks(Boolean.valueOf(props.getProperty("createlinks", "true")));
+		sync.setOverwriteAll(Boolean.valueOf(props.getProperty("overwrite", "false")));
+		sync.setTest(Boolean.valueOf(props.getProperty("test", "false")));
+	}
+
+	private static File findProject(File root) {
+		if (root == null) return null;
+		File f = new File(root, ".hsync.properties");
+		if (f.exists()) return root;
+		return root.getParentFile();
+	}
+
+	static void usage() {
+		System.out.println("Usage: hsync -url <url> -u <user> -p <password> -r <repository> [-delete|-d -notsize -overwrite -v -vv] clone|pull [<root dir>]");
 	}
 
 	static class CustomRecordFormatter extends Formatter {

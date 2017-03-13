@@ -28,7 +28,7 @@ public class FileSync {
 	private long filesPushed = 0;
 	private long filesDeleted = 0;
 	
-	public void doSync(SyncConnection con) throws IOException {
+	public void doPull(SyncConnection con, String path) throws IOException {
 		if (root == null || !root.exists()) throw new IOException("root not found: " + root);
 		
 		SyncMetadata meta = con.getMetadata();
@@ -37,9 +37,9 @@ public class FileSync {
 		
 		log.fine(">>> Start sync from " +  con + " to " + root);
 		
-		SyncStructure remoteRoot = con.getStructure(null, null, null);
+		SyncStructure remoteRoot = con.getStructure(path, null, null);
 		
-		syncDirectory(con, remoteRoot, root);
+		pullDirectory(con, remoteRoot, root);
 		
 		log.info("Pulled : " + filesPulled + ", " + bytesPulled + " Bytes");
 		log.info("Deleted: " + filesDeleted + ", " + bytesDeleted + " Bytes");
@@ -47,7 +47,7 @@ public class FileSync {
 		
 	}
 	
-	private void syncDirectory(SyncConnection con, SyncStructure remote, File local) throws IOException {
+	private void pullDirectory(SyncConnection con, SyncStructure remote, File local) throws IOException {
 		if (!remote.isDirectory()) {
 			log.fine("*** Remote is not a directory: " + remote.getPath());
 			return;
@@ -105,7 +105,7 @@ public class FileSync {
 			localList.remove(remoteChild.getName());
 			if (remoteChild.isDirectory()) {
 				log.finer("--- Synchronize Directory: " + remoteChild);
-				syncDirectory(con, remoteChild, localChild);
+				pullDirectory(con, remoteChild, localChild);
 			} else {
 				log.finer("--- Synchronize File: " + remoteChild);
 				if (	overwrite || 
