@@ -137,12 +137,12 @@ public class FileSync {
 						filesPulled++;
 						FileOutputStream os = new FileOutputStream(localChild);
 						if (!con.getFile( (path == null ? "" : path) + remoteChild.getPath(), os)) {
-							log.fine("*** Update failed: " + remoteChild);
+							log.warning("*** Update failed: " + remoteChild);
 						}
 						os.close();
 						localChild.setLastModified( remoteChild.getModifyDate() );
 						if (localChild.length() != remoteChild.getSize()) {
-							log.fine("*** Updated but different size: " + remoteChild + " R: " + remoteChild.getSize() + " L: " + localChild.length() + " " + localChild.getAbsolutePath());
+							log.warning("*** Updated but different size: " + remoteChild + " R: " + remoteChild.getSize() + " L: " + localChild.length() + " " + localChild.getAbsolutePath());
 						}
 					}
 					
