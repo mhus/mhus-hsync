@@ -126,6 +126,7 @@ public class SyncConnection {
 			try {
 				while (true) {
 					int cnt = is.read(buf);
+//					System.out.println(cnt);
 					if (cnt < 0) break;
 					if (cnt == 0) 
 						try {
@@ -309,7 +310,10 @@ public class SyncConnection {
 
 		@Override
 		public Object get(String name) {
-			return data.get(name);
+			try {
+				return data.get(name);
+			} catch (Exception e) {}
+			return null;
 		}
 		
 		public String toString() {
@@ -339,7 +343,10 @@ public class SyncConnection {
 
 		@Override
 		public Object get(String name) {
-			return data.get(name);
+			try {
+				return data.get(name);
+			} catch (Exception e) {}
+			return null;
 		}
 
 		@Override

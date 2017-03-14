@@ -18,6 +18,7 @@ import java.util.logging.SimpleFormatter;
 import de.mhus.hsync.lib.client.ClientExtension;
 import de.mhus.hsync.lib.client.ExtCheckModified;
 import de.mhus.hsync.lib.client.ExtCheckSize;
+import de.mhus.hsync.lib.client.ExtUnixPerms;
 import de.mhus.hsync.lib.client.FileSync;
 import de.mhus.hsync.lib.client.SyncConnection;
 import de.mhus.hsync.lib.client.SyncMetadata;
@@ -76,6 +77,9 @@ public class SyncClient {
 			} else
 			if ("-notsize".equals(arg)) {
 				props.setProperty("checksize", "false");
+			} else
+			if ("-perms".equals(arg)) {
+				props.setProperty("perms", "true");
 			} else
 			if ("-notmodified".equals(arg)) {
 				props.setProperty("checkmodified", "false");
@@ -181,6 +185,9 @@ public class SyncClient {
 		
 		if (Boolean.valueOf(props.getProperty("checksize", "true")))
 			sync.addExtension(new ExtCheckSize());
+
+		if (Boolean.valueOf(props.getProperty("perms", "false")))
+			sync.addExtension(new ExtUnixPerms());
 		
 		if (props.containsKey("extensions")) {
 			for (String extClass : props.getProperty("extensions").split(",")) {
