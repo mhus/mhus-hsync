@@ -41,6 +41,9 @@ Parameters:
 * showLinks=**true**|false: Enable show and follow links
 * followLinks=true|**false**: Enable following links
 
+Server Extensions:
+* Include extension file to enable it
+
 Notes:
 
 * IMPORTANT: In the server it could be possible to access all files in the repository, inclusive hidden and linked entries even if the will not be shown in the structure output.
@@ -70,6 +73,7 @@ Options:
 * -extensions: A comma separated list of class pathes that should be used as extensions
 * -v: verbose output
 * -vv: more verbose output
+* -perm: Use UnixPerm extension to sync also unix permissions. Server needs to use UnixPerms extension too
 
 Parameters:
 * command: clone|pull|info
