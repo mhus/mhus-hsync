@@ -34,13 +34,13 @@ public class ExtUnixPerms implements ClientExtension {
 				boolean diff = false;
 				
 				if (perms.charAt(1) == 'r') {
-					newPerms.add(PosixFilePermission.OTHERS_READ);
+					newPerms.add(PosixFilePermission.OWNER_READ);
 				}
 				if (perms.charAt(2) == 'w') {
-					newPerms.add(PosixFilePermission.OTHERS_WRITE);
+					newPerms.add(PosixFilePermission.OWNER_WRITE);
 				}
 				if (perms.charAt(3) == 'x') {
-					newPerms.add(PosixFilePermission.OTHERS_EXECUTE);
+					newPerms.add(PosixFilePermission.OWNER_EXECUTE);
 				}
 
 				if (perms.charAt(4) == 'r') {
@@ -54,13 +54,13 @@ public class ExtUnixPerms implements ClientExtension {
 				}
 
 				if (perms.charAt(7) == 'r') {
-					newPerms.add(PosixFilePermission.OWNER_READ);
+					newPerms.add(PosixFilePermission.OTHERS_READ);
 				}
 				if (perms.charAt(8) == 'w') {
-					newPerms.add(PosixFilePermission.OWNER_WRITE);
+					newPerms.add(PosixFilePermission.OTHERS_WRITE);
 				}
 				if (perms.charAt(9) == 'x') {
-					newPerms.add(PosixFilePermission.OWNER_EXECUTE);
+					newPerms.add(PosixFilePermission.OTHERS_EXECUTE);
 				}
 
 				if (localPerms.containsAll(newPerms) && newPerms.containsAll(localPerms))
