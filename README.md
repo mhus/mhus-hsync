@@ -58,18 +58,32 @@ If you need to compile the client before:
 * compile using maven: mvn install
 * Use the compiled assembly: mhus-hsync/java/hsync-client/target/hsync-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar
 
-You need to set:
+Options:
 * -url url: The url to the server side script
 * -u user: Username to login (if needed)
 * -p password: Password to login
 * -r repository: Name of the repository
-* command: pull|info
-* Local document root
-
-You can set:
-* -d: delete local files if not needed
+* -notmodified: Do not use the CheckModified extension (will not recognice a change if only modify date is changed)
+* -notsize: Do not use the CheckSize extension (will not recognice a change if the size of the file has changed)
+* -overwrite: Do overwrite all files
+* -d or -delete: Enable to delete files also (disabled by default)
+* -extensions: A comma separated list of class pathes that should be used as extensions
 * -v: verbose output
 * -vv: more verbose output
+
+Parameters:
+* command: clone|pull|info
+* Local document root
+
+Commands:
+* clone: pull remote content and create a .hsync.properties file to mark the local repository project
+* pull: pull data from remote. If a local repository is found, it will be done relative to the local repository
+* info: print remote repository informations
+
+Local Repository Project:
+* The file .hsync.properties marks a local repository root
+* The file contains the default repository connect configuration
+* The command 'clone' will write this file and set all given parameters
 
 Example:
 ```
@@ -88,6 +102,16 @@ mikehummel:~ # java -jar mhus-hsync/java/hsync-client/target/hsync-client-1.0.0-
 + d /vehicle
 + d /vehicle/auto
 + d /vehicle/plain
+```
+
+If you have static content and need to initialize existing content, disable modified check and use the SetModifyDate extension:
+
+```
+java -jar /Users/mikehummel/MHU/workspaces/mhus-hsync/mhus-hsync/java/hsync-client/target/hsync-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar -notmodified -extensions de.mhus.hsync.lib.client.ExtUpdateModifyDate pull
+
+m /animal/links.txt
+Pulled : 0, 0 Bytes
+Deleted: 0, 0 Bytes
 ```
 
 ## Protocol transport layer
