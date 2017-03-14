@@ -14,12 +14,10 @@ public class FileSync {
 	private static Logger log = Logger.getLogger(FileSync.class.getCanonicalName());
 	protected File root = null;
 	protected boolean delete = false;
-	protected boolean overwrite = false;
+	protected boolean overwriteAll = false;
 	private boolean test = true;
 	private boolean hidden = false;
 	private boolean createLinks = true;
-	private boolean checkSize = true;
-	private boolean checkModified = true;
 	private int version;
 	private long bytesPulled = 0;
 	private long bytesPushed = 0;
@@ -27,6 +25,9 @@ public class FileSync {
 	private long filesPulled = 0;
 	private long filesPushed = 0;
 	private long filesDeleted = 0;
+	
+	private LinkedList<ClientExtension> extensions = new LinkedList<>();
+	
 	
 	public void doPull(SyncConnection con, String path) throws IOException {
 		if (root == null || !root.exists()) throw new IOException("root not found: " + root);
@@ -67,7 +68,7 @@ public class FileSync {
 					log.info("- " + (local.isDirectory() ? "d 0 " : "f " + local.length() + " ") + remote.getPath());
 					delete(local);
 				} else {
-					log.info("*** Cant change link: " + local);
+					log.info("*** Can't change link: " + local);
 					return;
 				}
 			}
@@ -108,26 +109,34 @@ public class FileSync {
 				pullDirectory(path, con, remoteChild, localChild);
 			} else {
 				log.finer("--- Synchronize File: " + remoteChild);
-				if (	overwrite || 
-						!localChild.exists() || 
-						(checkSize && localChild.length() != remoteChild.getSize() ) || 
-						(checkModified && localChild.lastModified()/1000 != remoteChild.getModifyDate()/1000 ) 
-					) {
-					
-					if (overwrite)
-						log.finer("update by overwrite");
-					else
-					if (!localChild.exists())
-						log.finer("update because local is not present");
-					else
-					if (checkSize && localChild.length() != remoteChild.getSize() )
-						log.finer("update by file size: L=" + localChild.length() + " R=" + remoteChild.getSize() + " " + localChild.getAbsolutePath());
-					else
-					if (checkModified && localChild.lastModified()/1000 != remoteChild.getModifyDate()/1000 )
-						log.finer("update by modified: L=" + localChild.lastModified() + " R=" + remoteChild.getModifyDate());
-					else
-						log.fine("update ... don't know wmy");
-					
+				
+				boolean pull = false;
+				for (ClientExtension ext : extensions) {
+					if (ext.isNeedPull(this, remoteChild, localChild)) {
+						log.finer("need pull: " + ext);
+						pull = true;
+						break;
+					}
+				}
+				
+				if ( overwriteAll || pull) {
+					pull = true;
+					if (overwriteAll)
+						log.finer("pull by overwrite");
+				}
+
+				if (pull) {
+					for (ClientExtension ext : extensions) {
+						if (ext.isStopPull(this, remoteChild, localChild)) {
+							log.finer("stop pull: " + ext);
+							pull = false;
+							break;
+						}
+					}
+				}
+				
+				if (pull) {
+										
 					if (localChild.exists() && !localChild.isFile()) {
 						log.fine("*** Can't update file, it's not a file: " + localChild);
 					} else {
@@ -145,7 +154,12 @@ public class FileSync {
 							log.warning("*** Updated but different size: " + remoteChild + " R: " + remoteChild.getSize() + " L: " + localChild.length() + " " + localChild.getAbsolutePath());
 						}
 					}
-					
+				
+					pull = true;
+				}
+				
+				for (ClientExtension ext : extensions) {
+					ext.onPostPull(this,remoteChild,localChild, pull);
 				}
 				
 			}
@@ -155,6 +169,14 @@ public class FileSync {
 			for (String item : localList) {
 				File localChild = new File(local,item);
 				if (localChild.exists()) {
+
+					for (ClientExtension ext : extensions) {
+						if (ext.isStopDelete(this, localChild)) {
+							log.finer("stop delete: " + ext);
+							continue;
+						}
+					}
+					
 					log.info("- " + (localChild.isDirectory() ? "d 0 " : "f " + localChild.length() + " ") + remote + "/" + item);
 					delete(localChild);
 				}
@@ -199,12 +221,12 @@ public class FileSync {
 	}
 
 	public boolean isOverwriteAll() {
-		return overwrite;
+		return overwriteAll;
 	}
 
 
 	public void setOverwriteAll(boolean overwrite) {
-		this.overwrite = overwrite;
+		this.overwriteAll = overwrite;
 	}
 
 	public boolean isTest() {
@@ -215,28 +237,16 @@ public class FileSync {
 		this.test = test;
 	}
 
-	public boolean isCheckSize() {
-		return checkSize;
-	}
-
-	public void setCheckSize(boolean checkSize) {
-		this.checkSize = checkSize;
-	}
-
-	public boolean isCheckModified() {
-		return checkModified;
-	}
-
-	public void setCheckModified(boolean checkModified) {
-		this.checkModified = checkModified;
-	}
-
 	public boolean isCreateLinks() {
 		return createLinks;
 	}
 
 	public void setCreateLinks(boolean createLinks) {
 		this.createLinks = createLinks;
+	}
+	
+	public void addExtension(ClientExtension extension) {
+		extensions.add(extension);
 	}
 	
 }

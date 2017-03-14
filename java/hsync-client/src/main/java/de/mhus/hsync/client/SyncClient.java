@@ -15,6 +15,9 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import de.mhus.hsync.lib.client.ClientExtension;
+import de.mhus.hsync.lib.client.ExtCheckModified;
+import de.mhus.hsync.lib.client.ExtCheckSize;
 import de.mhus.hsync.lib.client.FileSync;
 import de.mhus.hsync.lib.client.SyncConnection;
 import de.mhus.hsync.lib.client.SyncMetadata;
@@ -23,7 +26,7 @@ public class SyncClient {
 
 	static Logger log = Logger.getLogger(SyncClient.class.getName());
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		
 		String cmd = null;
 		File root = null;
@@ -63,6 +66,10 @@ public class SyncClient {
 			if ("-r".equals(arg)) {
 				i++;
 				props.setProperty("repository", args[i]);
+			} else
+			if ("-extensions".equals(arg)) {
+				i++;
+				props.setProperty("extensions", args[i]);
 			} else
 			if ("-d".equals(arg) || "-delete".equals(arg)) {
 				props.setProperty("delete", "true");
@@ -163,13 +170,25 @@ public class SyncClient {
 		return con;
 	}
 
-	private static void fillSync(FileSync sync, Properties props) {
+	private static void fillSync(FileSync sync, Properties props) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		sync.setDelete(Boolean.valueOf(props.getProperty("delete", "false")));
-		sync.setCheckModified(Boolean.valueOf(props.getProperty("checkmodified", "true")));
-		sync.setCheckSize(Boolean.valueOf(props.getProperty("checksize", "true")));
 		sync.setCreateLinks(Boolean.valueOf(props.getProperty("createlinks", "true")));
 		sync.setOverwriteAll(Boolean.valueOf(props.getProperty("overwrite", "false")));
 		sync.setTest(Boolean.valueOf(props.getProperty("test", "false")));
+		
+		if (Boolean.valueOf(props.getProperty("checkmodified", "true")))
+			sync.addExtension(new ExtCheckModified());
+		
+		if (Boolean.valueOf(props.getProperty("checksize", "true")))
+			sync.addExtension(new ExtCheckSize());
+		
+		if (props.containsKey("extensions")) {
+			for (String extClass : props.getProperty("extensions").split(",")) {
+				ClientExtension extObj = (ClientExtension) Class.forName(extClass).newInstance();
+				sync.addExtension(extObj);
+			}
+		}
+		
 	}
 
 	private static File findProject(File root) {

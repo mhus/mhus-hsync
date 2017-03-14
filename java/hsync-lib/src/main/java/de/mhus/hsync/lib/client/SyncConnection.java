@@ -3,6 +3,7 @@ package de.mhus.hsync.lib.client;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
@@ -45,7 +46,8 @@ public class SyncConnection {
 		if (proxy != null) Unirest.setProxy(proxy);
 	}
 
-	public SyncMetadata getMetadata() {
+	public SyncMetadata getMetadata() throws IOException {
+		check();
 		try {
 			HashMap<String, Object> parameters = new HashMap<>();
 			parameters.put("repository", repository);
@@ -60,7 +62,13 @@ public class SyncConnection {
 		}
 	}
 
-	public SyncStructure getStructure(String path, Long modified, Integer depth) {
+	private void check() throws IOException {
+		if (repository == null) throw new IOException("repository not set");
+		if (hostUrl == null) throw new IOException("url not set");
+	}
+
+	public SyncStructure getStructure(String path, Long modified, Integer depth) throws IOException {
+		check();
 		try {
 			HashMap<String, Object> parameters = new HashMap<>();
 			parameters.put("repository", repository);
@@ -79,7 +87,8 @@ public class SyncConnection {
 		}
 	}
 	
-	public boolean getFile(String path, OutputStream os) {
+	public boolean getFile(String path, OutputStream os) throws IOException {
+		check();
 		try {
 			
 			status = 0;
@@ -117,6 +126,7 @@ public class SyncConnection {
 			try {
 				while (true) {
 					int cnt = is.read(buf);
+					if (cnt < 0) break;
 					if (cnt == 0) 
 						try {
 							Thread.sleep(100);
@@ -135,7 +145,7 @@ public class SyncConnection {
 					
 		} catch (Throwable t) {
 			log.warning(t.toString());
-			// t.printStackTrace();
+			t.printStackTrace();
 			return false;
 		}
 		
