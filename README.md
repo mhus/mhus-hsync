@@ -52,7 +52,7 @@ Notes:
 
 ## Java Client
 
-Use the java client jar file to sync a repository [build/hsync.jar]
+Use the java client jar file to sync a repository [build/hsync.jar](build/hsync.jar)
 
 java -jar hsync.jar -url http://localhost/hsync/hsync.php -r test -d pull ~/tmp/test
 
