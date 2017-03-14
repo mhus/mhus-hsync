@@ -15,6 +15,7 @@ Version 2: Also implement at HTTP side write functionality
 
 ## PHP Sync-Server Installation
 
+* Download the repository zip file
 * Copy the 'php/server/' parts into a PHP enabled document root and configure the repositories by creating files 'conf/'. 
 * Remove the 'test' repsoitory (repo_test.php). 
 * Remove test folder 'repo'. 
@@ -51,7 +52,7 @@ Notes:
 
 ## Java Client
 
-Use the java client jar file to sync a repository
+Use the java client jar file to sync a repository [build/hsync.jar]
 
 java -jar hsync.jar -url http://localhost/hsync/hsync.php -r test -d pull ~/tmp/test
 
