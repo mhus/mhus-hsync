@@ -1,5 +1,5 @@
 # mhus-hsync
-Sync tools like rsync in different languages but compatible over http.
+Sync tools like rsync using http protocol.
 
 A big problem of rsync is that it is not possible to synchrionize files over the very common protocol 'http' or 'https'. To solve the requirement I created this project. The goals should be synchronizing files over http using different programming languages. Therefore a simple protocol will do the job.
 
@@ -75,6 +75,7 @@ Options:
 * -v: verbose output
 * -vv: more verbose output
 * -perm: Use UnixPerm extension to sync also unix permissions. Server needs to use UnixPerms extension too
+* -x: Additional parameters, only key to set to true or key=value, e.g -x checkmodified or -x password=abc
 
 Parameters:
 * command: clone|pull|info
@@ -92,7 +93,7 @@ Local Repository Project:
 
 Example:
 ```
-mikehummel:~ # java -jar mhus-hsync/java/hsync-client/target/hsync-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar -url http://localhost/hsync/hsync.php -r test -d pull ~/tmp/test
+mikehummel:~ # java -jar hsync.jar -url http://localhost/hsync/hsync.php -r test -d pull ~/tmp/test
 + d /animal
 + d /animal/amphibians
 + d /animal/birds
@@ -112,7 +113,7 @@ mikehummel:~ # java -jar mhus-hsync/java/hsync-client/target/hsync-client-1.0.0-
 If you have static content and need to initialize existing content, disable modified check and use the SetModifyDate extension:
 
 ```
-java -jar /Users/mikehummel/MHU/workspaces/mhus-hsync/mhus-hsync/java/hsync-client/target/hsync-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar -notmodified -extensions de.mhus.hsync.lib.client.ExtUpdateModifyDate pull
+java -jar hsync.jar -notmodified -extensions de.mhus.hsync.lib.client.ExtUpdateModifyDate pull
 
 m /animal/links.txt
 Pulled : 0, 0 Bytes
