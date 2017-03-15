@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 public class FileSync {
@@ -27,6 +28,7 @@ public class FileSync {
 	private long filesDeleted = 0;
 	
 	private LinkedList<ClientExtension> extensions = new LinkedList<>();
+	private Properties properties;
 	
 	
 	public void doPull(SyncConnection con, String path) throws IOException {
@@ -112,7 +114,7 @@ public class FileSync {
 				
 				boolean pull = false;
 				for (ClientExtension ext : extensions) {
-					if (ext.isNeedPull(this, remoteChild, localChild)) {
+					if (ext.isNeedPull(remoteChild, localChild)) {
 						log.finer("need pull: " + ext);
 						pull = true;
 						break;
@@ -127,7 +129,7 @@ public class FileSync {
 
 				if (pull) {
 					for (ClientExtension ext : extensions) {
-						if (ext.isStopPull(this, remoteChild, localChild)) {
+						if (ext.isStopPull(remoteChild, localChild)) {
 							log.finer("stop pull: " + ext);
 							pull = false;
 							break;
@@ -159,7 +161,7 @@ public class FileSync {
 				}
 				
 				for (ClientExtension ext : extensions) {
-					ext.onPostPull(this,remoteChild,localChild, pull);
+					ext.onPostPull(remoteChild,localChild, pull);
 				}
 				
 			}
@@ -171,7 +173,7 @@ public class FileSync {
 				if (localChild.exists()) {
 
 					for (ClientExtension ext : extensions) {
-						if (ext.isStopDelete(this, localChild)) {
+						if (ext.isStopDelete(localChild)) {
 							log.finer("stop delete: " + ext);
 							continue;
 						}
@@ -247,6 +249,25 @@ public class FileSync {
 	
 	public void addExtension(ClientExtension extension) {
 		extensions.add(extension);
+	}
+	
+	public void doInitialize(Properties props) {
+		this.properties = props;
+		log.fine("Initialize with: " + props);
+		setDelete(Boolean.valueOf(props.getProperty("delete", "false")));
+		setCreateLinks(Boolean.valueOf(props.getProperty("createlinks", "true")));
+		setOverwriteAll(Boolean.valueOf(props.getProperty("overwrite", "false")));
+		setTest(Boolean.valueOf(props.getProperty("test", "false")));
+
+		for (ClientExtension ext : extensions) {
+			log.fine("Initialize Extension: " + ext.getClass());
+			ext.doInitialize(this);
+		}
+
+	}
+
+	public Properties getProperties() {
+		return properties;
 	}
 	
 }

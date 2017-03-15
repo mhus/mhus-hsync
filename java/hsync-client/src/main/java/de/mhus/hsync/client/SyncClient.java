@@ -60,6 +60,21 @@ public class SyncClient {
 				i++;
 				props.setProperty("password", args[i]);
 			} else
+			if ("-x".equals(arg)) {
+				i++;
+				String pair = args[i];
+				int pos = pair.indexOf('=');
+				String key = null;
+				String value = null;
+				if (pos >= 0) {
+					key = pair.substring(0, pos);
+					value = pair.substring(pos+1);
+				} else {
+					key = pair;
+					value = "true";
+				}
+				props.setProperty(key, value);
+			} else
 			if ("-url".equals(arg)) {
 				i++;
 				props.setProperty("url", args[i]);
@@ -175,10 +190,6 @@ public class SyncClient {
 	}
 
 	private static void fillSync(FileSync sync, Properties props) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-		sync.setDelete(Boolean.valueOf(props.getProperty("delete", "false")));
-		sync.setCreateLinks(Boolean.valueOf(props.getProperty("createlinks", "true")));
-		sync.setOverwriteAll(Boolean.valueOf(props.getProperty("overwrite", "false")));
-		sync.setTest(Boolean.valueOf(props.getProperty("test", "false")));
 		
 		if (Boolean.valueOf(props.getProperty("checkmodified", "true")))
 			sync.addExtension(new ExtCheckModified());
@@ -195,6 +206,8 @@ public class SyncClient {
 				sync.addExtension(extObj);
 			}
 		}
+		
+		sync.doInitialize(props);
 		
 	}
 

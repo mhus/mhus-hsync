@@ -14,17 +14,17 @@ public class ExtUnixPerms implements ClientExtension {
 	static Logger log = Logger.getLogger(ExtUnixPerms.class.getName());
 
 	@Override
-	public boolean isNeedPull(FileSync fileSync, SyncStructure remoteChild, File localChild) {
+	public boolean isNeedPull(SyncStructure remoteChild, File localChild) {
 		return false;
 	}
 
 	@Override
-	public boolean isStopPull(FileSync fileSync, SyncStructure remoteChild, File localChild) {
+	public boolean isStopPull(SyncStructure remoteChild, File localChild) {
 		return false;
 	}
 
 	@Override
-	public void onPostPull(FileSync fileSync, SyncStructure remoteChild, File localChild, boolean pull) {
+	public void onPostPull(SyncStructure remoteChild, File localChild, boolean pull) {
 		String perms = (String)remoteChild.get("perms");
 		if (perms != null && perms.length() == 10) {
 			// check and update
@@ -76,8 +76,14 @@ public class ExtUnixPerms implements ClientExtension {
 	}
 
 	@Override
-	public boolean isStopDelete(FileSync fileSync, File localChild) {
+	public boolean isStopDelete(File localChild) {
 		return false;
+	}
+
+	@Override
+	public void doInitialize(FileSync fileSync) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

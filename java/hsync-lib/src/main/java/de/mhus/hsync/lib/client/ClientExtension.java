@@ -4,12 +4,14 @@ import java.io.File;
 
 public interface ClientExtension {
 
-	boolean isNeedPull(FileSync fileSync, SyncStructure remoteChild, File localChild);
-
-	boolean isStopPull(FileSync fileSync, SyncStructure remoteChild, File localChild);
+	void doInitialize(FileSync fileSync);
 	
-	void onPostPull(FileSync fileSync, SyncStructure remoteChild, File localChild, boolean pull);
+	boolean isNeedPull(SyncStructure remoteChild, File localChild);
 
-	boolean isStopDelete(FileSync fileSync, File localChild);
+	boolean isStopPull(SyncStructure remoteChild, File localChild);
+	
+	void onPostPull(SyncStructure remoteChild, File localChild, boolean pull);
+
+	boolean isStopDelete(File localChild);
 
 }
